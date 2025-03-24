@@ -1,0 +1,113 @@
+<html><head>
+<title>.\validate_form.py</title>
+<meta name="Generator" content="htmlizer/[Twisted, version 24.11.0]" />
+<link rel="alternate" href=".\validate_form.py" type="text/x-python" />
+
+</head>
+<body>
+<pre><span class="py-src-variable">from</span> <span class="py-src-variable">flask</span> <span class="py-src-variable">import</span> <span class="py-src-variable">Flask</span>, <span class="py-src-variable">request</span>, <span class="py-src-variable">jsonify</span>, <span class="py-src-variable">render_template</span>
+<span class="py-src-variable">import</span> <span class="py-src-variable">re</span>
+<span class="py-src-variable">from</span> <span class="py-src-variable">html</span> <span class="py-src-variable">import</span> <span class="py-src-variable">escape</span>
+<span class="py-src-variable">from</span> <span class="py-src-variable">bs4</span> <span class="py-src-variable">import</span> <span class="py-src-variable">BeautifulSoup</span>
+<span class="py-src-variable">import</span> <span class="py-src-variable">scrapy</span>
+<span class="py-src-variable">import</span> <span class="py-src-variable">tkinter</span> <span class="py-src-variable">as</span> <span class="py-src-variable">tk</span>
+<span class="py-src-variable">from</span> <span class="py-src-variable">tkinter</span> <span class="py-src-variable">import</span> <span class="py-src-variable">messagebox</span>
+
+<span class="py-src-variable">import</span> <span class="py-src-variable">threading</span>  <span class="py-src-comment"># For running Flask in a separate thread</span>
+
+<span class="py-src-variable">ENABLE_TKINTER</span> = <span class="py-src-variable">True</span>  <span class="py-src-comment"># Set to True to enable Tkinter</span>
+
+<span class="py-src-variable">app</span> = <span class="py-src-variable">Flask</span>(<span class="py-src-variable">__name__</span>, <span class="py-src-variable">static_folder</span>=<span class="py-src-string">&#x27;static&#x27;</span>, <span class="py-src-variable">template_folder</span>=<span class="py-src-string">&#x27;templates&#x27;</span>)
+
+@<span class="py-src-variable">app</span>.<span class="py-src-variable">route</span>(<span class="py-src-string">&#x27;/&#x27;</span>)
+<span class="py-src-variable">def</span> <span class="py-src-identifier">home</span>():
+    <span class="py-src-variable">return</span> <span class="py-src-variable">render_template</span>(<span class="py-src-string">&quot;index.html&quot;</span>)
+
+<span class="py-src-variable">def</span> <span class="py-src-identifier">validate_form</span>(<span class="py-src-parameter">form_data</span>):
+    <span class="py-src-variable">errors</span> = {}
+    <span class="py-src-variable">sanitized_data</span> = {}
+
+    <span class="py-src-comment"># Validate Name (Required)</span>
+    <span class="py-src-variable">if</span> <span class="py-src-variable">not</span> <span class="py-src-variable">form_data</span>.<span class="py-src-variable">get</span>(<span class="py-src-string">&quot;name&quot;</span>):
+        <span class="py-src-variable">errors</span>[<span class="py-src-string">&quot;name&quot;</span>] = <span class="py-src-string">&quot;Name is required.&quot;</span>
+    <span class="py-src-variable">else</span>:
+        <span class="py-src-variable">sanitized_data</span>[<span class="py-src-string">&quot;name&quot;</span>] = <span class="py-src-variable">form_data</span>[<span class="py-src-string">&quot;name&quot;</span>].<span class="py-src-variable">strip</span>()
+
+    <span class="py-src-comment"># Validate Email (Required &amp; Valid Format)</span>
+    <span class="py-src-variable">email_pattern</span> = <span class="py-src-string">r&#x27;^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$&#x27;</span>
+    <span class="py-src-variable">if</span> <span class="py-src-variable">not</span> <span class="py-src-variable">form_data</span>.<span class="py-src-variable">get</span>(<span class="py-src-string">&quot;email&quot;</span>):
+        <span class="py-src-variable">errors</span>[<span class="py-src-string">&quot;email&quot;</span>] = <span class="py-src-string">&quot;Email is required.&quot;</span>
+    <span class="py-src-variable">elif</span> <span class="py-src-variable">not</span> <span class="py-src-variable">re</span>.<span class="py-src-variable">match</span>(<span class="py-src-variable">email_pattern</span>, <span class="py-src-variable">form_data</span>[<span class="py-src-string">&quot;email&quot;</span>]):
+        <span class="py-src-variable">errors</span>[<span class="py-src-string">&quot;email&quot;</span>] = <span class="py-src-string">&quot;Invalid email format.&quot;</span>
+    <span class="py-src-variable">else</span>:
+        <span class="py-src-variable">sanitized_data</span>[<span class="py-src-string">&quot;email&quot;</span>] = <span class="py-src-variable">form_data</span>[<span class="py-src-string">&quot;email&quot;</span>].<span class="py-src-variable">strip</span>()
+
+    <span class="py-src-comment"># Validate Age (Optional, but must be between 18-120 if provided)</span>
+    <span class="py-src-variable">age</span> = <span class="py-src-variable">form_data</span>.<span class="py-src-variable">get</span>(<span class="py-src-string">&quot;age&quot;</span>)
+    <span class="py-src-variable">if</span> <span class="py-src-variable">age</span>:
+        <span class="py-src-variable">try</span>:
+            <span class="py-src-variable">age</span> = <span class="py-src-variable">int</span>(<span class="py-src-variable">age</span>)
+            <span class="py-src-variable">if</span> <span class="py-src-variable">age</span> &lt; <span class="py-src-number">18</span> <span class="py-src-variable">or</span> <span class="py-src-variable">age</span> &gt; <span class="py-src-number">120</span>:
+                <span class="py-src-variable">errors</span>[<span class="py-src-string">&quot;age&quot;</span>] = <span class="py-src-string">&quot;Age must be between 18 and 120.&quot;</span>
+            <span class="py-src-variable">else</span>:
+                <span class="py-src-variable">sanitized_data</span>[<span class="py-src-string">&quot;age&quot;</span>] = <span class="py-src-variable">age</span>
+        <span class="py-src-variable">except</span> <span class="py-src-variable">ValueError</span>:
+            <span class="py-src-variable">errors</span>[<span class="py-src-string">&quot;age&quot;</span>] = <span class="py-src-string">&quot;Age must be a valid integer.&quot;</span>
+
+    <span class="py-src-comment"># Sanitize Message (Optional, remove HTML/script tags using BeautifulSoup)</span>
+    <span class="py-src-variable">message</span> = <span class="py-src-variable">form_data</span>.<span class="py-src-variable">get</span>(<span class="py-src-string">&quot;message&quot;</span>, <span class="py-src-string">&quot;&quot;</span>)
+    <span class="py-src-variable">soup</span> = <span class="py-src-variable">BeautifulSoup</span>(<span class="py-src-variable">message</span>, <span class="py-src-string">&quot;html.parser&quot;</span>)
+    <span class="py-src-variable">sanitized_data</span>[<span class="py-src-string">&quot;message&quot;</span>] = <span class="py-src-variable">soup</span>.<span class="py-src-variable">get_text</span>().<span class="py-src-variable">strip</span>()
+
+    <span class="py-src-variable">return</span> {<span class="py-src-string">&quot;errors&quot;</span>: <span class="py-src-variable">errors</span>, <span class="py-src-string">&quot;sanitized_data&quot;</span>: <span class="py-src-variable">sanitized_data</span>}
+
+@<span class="py-src-variable">app</span>.<span class="py-src-variable">route</span>(<span class="py-src-string">&#x27;/submit&#x27;</span>, <span class="py-src-variable">methods</span>=[<span class="py-src-string">&#x27;POST&#x27;</span>])
+<span class="py-src-variable">def</span> <span class="py-src-identifier">submit_form</span>():
+    <span class="py-src-variable">form_data</span> = <span class="py-src-variable">request</span>.<span class="py-src-variable">json</span>
+    <span class="py-src-variable">result</span> = <span class="py-src-variable">validate_form</span>(<span class="py-src-variable">form_data</span>)
+    <span class="py-src-variable">return</span> <span class="py-src-variable">jsonify</span>(<span class="py-src-variable">result</span>)
+
+<span class="py-src-comment"># Tkinter GUI Setup (Disabled by Default)</span>
+<span class="py-src-variable">def</span> <span class="py-src-identifier">submit_tk_form</span>():
+    <span class="py-src-variable">form_data</span> = {
+        <span class="py-src-string">&quot;name&quot;</span>: <span class="py-src-variable">name_entry</span>.<span class="py-src-variable">get</span>(),
+        <span class="py-src-string">&quot;email&quot;</span>: <span class="py-src-variable">email_entry</span>.<span class="py-src-variable">get</span>(),
+        <span class="py-src-string">&quot;age&quot;</span>: <span class="py-src-variable">age_entry</span>.<span class="py-src-variable">get</span>(),
+        <span class="py-src-string">&quot;message&quot;</span>: <span class="py-src-variable">message_entry</span>.<span class="py-src-variable">get</span>(<span class="py-src-string">&quot;1.0&quot;</span>, <span class="py-src-variable">tk</span>.<span class="py-src-variable">END</span>)
+    }
+
+    <span class="py-src-variable">result</span> = <span class="py-src-variable">validate_form</span>(<span class="py-src-variable">form_data</span>)
+    <span class="py-src-variable">if</span> <span class="py-src-variable">result</span>[<span class="py-src-string">&quot;errors&quot;</span>]:
+        <span class="py-src-variable">messagebox</span>.<span class="py-src-variable">showerror</span>(<span class="py-src-string">&quot;Form Errors&quot;</span>, <span class="py-src-variable">str</span>(<span class="py-src-variable">result</span>[<span class="py-src-string">&quot;errors&quot;</span>]))
+    <span class="py-src-variable">else</span>:
+        <span class="py-src-variable">messagebox</span>.<span class="py-src-variable">showinfo</span>(<span class="py-src-string">&quot;Success&quot;</span>, <span class="py-src-string">&quot;Form submitted successfully!&quot;</span>)
+
+<span class="py-src-variable">if</span> <span class="py-src-variable">ENABLE_TKINTER</span>:
+    <span class="py-src-variable">root</span> = <span class="py-src-variable">tk</span>.<span class="py-src-variable">Tk</span>()
+    <span class="py-src-variable">root</span>.<span class="py-src-variable">title</span>(<span class="py-src-string">&quot;Form Validation&quot;</span>)
+
+    <span class="py-src-variable">tk</span>.<span class="py-src-variable">Label</span>(<span class="py-src-variable">root</span>, <span class="py-src-variable">text</span>=<span class="py-src-string">&quot;Name:&quot;</span>).<span class="py-src-variable">grid</span>(<span class="py-src-variable">row</span>=<span class="py-src-number">0</span>, <span class="py-src-variable">column</span>=<span class="py-src-number">0</span>)
+    <span class="py-src-variable">name_entry</span> = <span class="py-src-variable">tk</span>.<span class="py-src-variable">Entry</span>(<span class="py-src-variable">root</span>)
+    <span class="py-src-variable">name_entry</span>.<span class="py-src-variable">grid</span>(<span class="py-src-variable">row</span>=<span class="py-src-number">0</span>, <span class="py-src-variable">column</span>=<span class="py-src-number">1</span>)
+
+    <span class="py-src-variable">tk</span>.<span class="py-src-variable">Label</span>(<span class="py-src-variable">root</span>, <span class="py-src-variable">text</span>=<span class="py-src-string">&quot;Email:&quot;</span>).<span class="py-src-variable">grid</span>(<span class="py-src-variable">row</span>=<span class="py-src-number">1</span>, <span class="py-src-variable">column</span>=<span class="py-src-number">0</span>)
+    <span class="py-src-variable">email_entry</span> = <span class="py-src-variable">tk</span>.<span class="py-src-variable">Entry</span>(<span class="py-src-variable">root</span>)
+    <span class="py-src-variable">email_entry</span>.<span class="py-src-variable">grid</span>(<span class="py-src-variable">row</span>=<span class="py-src-number">1</span>, <span class="py-src-variable">column</span>=<span class="py-src-number">1</span>)
+
+    <span class="py-src-variable">tk</span>.<span class="py-src-variable">Label</span>(<span class="py-src-variable">root</span>, <span class="py-src-variable">text</span>=<span class="py-src-string">&quot;Age:&quot;</span>).<span class="py-src-variable">grid</span>(<span class="py-src-variable">row</span>=<span class="py-src-number">2</span>, <span class="py-src-variable">column</span>=<span class="py-src-number">0</span>)
+    <span class="py-src-variable">age_entry</span> = <span class="py-src-variable">tk</span>.<span class="py-src-variable">Entry</span>(<span class="py-src-variable">root</span>)
+    <span class="py-src-variable">age_entry</span>.<span class="py-src-variable">grid</span>(<span class="py-src-variable">row</span>=<span class="py-src-number">2</span>, <span class="py-src-variable">column</span>=<span class="py-src-number">1</span>)
+
+    <span class="py-src-variable">tk</span>.<span class="py-src-variable">Label</span>(<span class="py-src-variable">root</span>, <span class="py-src-variable">text</span>=<span class="py-src-string">&quot;Message:&quot;</span>).<span class="py-src-variable">grid</span>(<span class="py-src-variable">row</span>=<span class="py-src-number">3</span>, <span class="py-src-variable">column</span>=<span class="py-src-number">0</span>)
+    <span class="py-src-variable">message_entry</span> = <span class="py-src-variable">tk</span>.<span class="py-src-variable">Text</span>(<span class="py-src-variable">root</span>, <span class="py-src-variable">height</span>=<span class="py-src-number">4</span>, <span class="py-src-variable">width</span>=<span class="py-src-number">30</span>)
+    <span class="py-src-variable">message_entry</span>.<span class="py-src-variable">grid</span>(<span class="py-src-variable">row</span>=<span class="py-src-number">3</span>, <span class="py-src-variable">column</span>=<span class="py-src-number">1</span>)
+
+    <span class="py-src-variable">tk</span>.<span class="py-src-variable">Button</span>(<span class="py-src-variable">root</span>, <span class="py-src-variable">text</span>=<span class="py-src-string">&quot;Submit&quot;</span>, <span class="py-src-variable">command</span>=<span class="py-src-variable">submit_tk_form</span>).<span class="py-src-variable">grid</span>(<span class="py-src-variable">row</span>=<span class="py-src-number">4</span>, <span class="py-src-variable">column</span>=<span class="py-src-number">1</span>)
+
+<span class="py-src-variable">if</span> <span class="py-src-variable">__name__</span> == <span class="py-src-string">&#x27;__main__&#x27;</span>:
+    <span class="py-src-variable">if</span> <span class="py-src-variable">ENABLE_TKINTER</span>:
+        <span class="py-src-variable">root</span>.<span class="py-src-variable">mainloop</span>()  <span class="py-src-comment"># Only runs if Tkinter is enabled</span>
+    <span class="py-src-variable">else</span>:
+        <span class="py-src-variable">app</span>.<span class="py-src-variable">run</span>(<span class="py-src-variable">debug</span>=<span class="py-src-variable">True</span>)  <span class="py-src-comment"># Flask always runs if Tkinter is disabled</span>
+</pre>
+</body>
