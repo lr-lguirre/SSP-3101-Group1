@@ -1,10 +1,10 @@
-Mapua Malayan Digital College
-MO-IT142 Security Script Programming S3103
+*** Mapua Malayan Digital College ***
+*** MO-IT142 Security Script Programming S3103 ***
 
-Members:
-- Lawrence Guirre
-- Dioscoro Bondoy III
-- Charles Ferdiemar Gan
+- Members:
+    - Lawrence Guirre
+    - Dioscoro Bondoy III
+    - Charles Ferdiemar Gan
 
 Compilation of outputs
 Milestone 1: 
