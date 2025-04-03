@@ -6,7 +6,8 @@
     - Dioscoro Bondoy III
     - Charles Ferdiemar Gan
 
-Compilation of outputs
+Compilation of outputs<br>
+
 Milestone 1: 
 - Web Security Tool
     - Objective: To verify the password strength assessor meets all the criteria for length, complexity, and pattern checks.
