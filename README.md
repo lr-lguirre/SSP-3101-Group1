@@ -1,5 +1,5 @@
-*** Mapua Malayan Digital College ***
-*** MO-IT142 Security Script Programming S3103 ***
+- *** Mapua Malayan Digital College ***
+- *** MO-IT142 Security Script Programming S3103 ***
 
 - Members:
     - Lawrence Guirre
