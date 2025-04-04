@@ -2,7 +2,7 @@
 # MO-IT142 Security Script Programming S3103<br>
 
 Course Mentor:<br>
-    - Ms. Maureen Terminez
+    - Ms. Maureen Mae Terminez
     
 Group 1
 - Leader:
