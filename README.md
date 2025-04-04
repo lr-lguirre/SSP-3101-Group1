@@ -1,15 +1,15 @@
 # Mapua Malayan Digital College<br>
 # MO-IT142 Security Script Programming S3103<br>
 
-Course Mentor:<br>
+<b>Course Mentor:</b><br>
     - Ms. Maureen Mae Terminez
     
-Group 1
-- Leader:
-    - Lawrence Guirre
-- Members:     
-    - Dioscoro Bondoy III
-    - Charles Ferdiemar Gan
+<b>Group 1</b>
+- <b><i>Leader:</i></b>
+    - <i>Lawrence Guirre</i>
+- <b><i>Members:</i></b>     
+    - <i>Dioscoro Bondoy III</i>
+    - <i>Charles Ferdiemar Gan</i>
 
 Compilation of outputs<br>
 
