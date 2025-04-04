@@ -4,7 +4,7 @@
 Course Mentor:<br>
     - Ms. Maureen Terminez
     
-- Group 1
+Group 1
 - Leader:
     - Lawrence Guirre
 - Members:     
