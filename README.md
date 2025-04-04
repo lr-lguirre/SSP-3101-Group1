@@ -8,7 +8,7 @@
 
 Compilation of outputs<br>
 
-Milestone 1: 
+<b>Milestone 1:</b> 
 - Web Security Tool
     - Objective: To verify the password strength assessor meets all the criteria for length, complexity, and pattern checks.
 - Random Hash Password Generator
@@ -16,7 +16,7 @@ Milestone 1:
 - Web Form Input Validator and Sanitizer
     - Objective: To validate and sanitize user input for common web form fields.
 
-MileStone 2:
+<b>Milestone 2:</b>
 - Basic Network Port Scanner
     - Objective: To verify that the port scanner identifies open, close, and filtered ports accurately.
 - Basic Network Traffic Analyzer
